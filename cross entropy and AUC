@@ -1,0 +1,57 @@
+#install.packages("minpack.lm")
+library(minpack.lm)
+# simulate oscillating probabilistic data representing outcomes under uncertainty
+x <- seq(0,10,length.out = 200)
+
+#Create binary outcome y based on underlying sinusoidal probility
+true_prob <- (sin(x)+1)/2
+y <- rbinom(200,1,true_prob)
+
+
+
+data <- data.frame(x, y)
+plot (x,y)
+
+#fit logistic regressioin model to predict probability of outcome
+logr_model <- glm(y ~ x, data = data, family = binomial)
+#predict response probabilites for logistic regression
+problr = predict(logr_model, type = "response")
+summary(logr_model)
+
+# fit nonlinear sinusoidal model to capture underlying periodic patterns
+sin_model <- nlsLM(y ~ A*sin(B*x +C)+D, data = data, start = list(A=0.5, B=1, C=0, D=0.5), control = list(maxiter = 500))
+#Predict response probabilities for sinusoidal model
+probs <- predict(sin_model, newdata = data)
+summary(sin_model)
+
+# compare log and sin curve
+plot(data$x, data$y, pch = 19, col = "gray40", xlab = "x", ylab = "y (1 = yes)")
+lines(x, problr, col = "green", lwd = 2, lty = 2)
+lines(x, probs, col = "blue", lwd = 3)
+
+# Cross-entropy measures how well predicted probabilities match actual outcomes
+#Lower cross-entropy indicates better probabilistic predictions
+cross_e_logr <- mean(y* log(problr +1e-10)+(1-y)*log(1-problr +1e-10))
+# scale sinusodial probabilities for stability
+probs_sin <- (probs - min(probs))/(max(probs) -min(probs))
+probs_sin <- pmin(pmax(probs_sin, 1e-10), 1-1e-10)
+ce_sin <- -mean(y*log(probs_sin)+(1-y)*log(1-probs_sin))
+
+
+cat("cross entropy logr:", cross_e_logr, "\n")
+cat("cross entropy sin:", ce_sin, "\n")
+
+#first run sin:.37 log:-.67 sin is closer to one so it is the better model
+
+# Evaluate models using AUC to measure ability to separate classes
+# Higher AUC indicates better classification performance
+# Compare models and select the one with better predictive reliability
+#install.packages("pROC")
+library(pROC)
+sin_auc <- auc(data$y, probs)
+logr_auc <- auc(data$y, problr)
+cat("AUC sin:",sin_auc,"\n")
+cat("AUC logr:",logr_auc,"\n")
+
+
+# Insight: Selected model with higher AUC demonstrating ablity to make robust probabilistic predictions
