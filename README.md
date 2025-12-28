@@ -31,3 +31,23 @@ Binary classification models often assume monotonic relationships between predic
   
   ```r
   y <- rbinom(200, 1, true_prob)
+
+## Results & Visualization
+
+The figure below compares observed binary outcomes with predicted probabilities from both models.
+
+- Gray points represent observed binary outcomes.
+- The green dashed line shows logistic regression predictions.
+- The blue solid line shows sinusoidal model predictions.
+
+### Interpretation
+The logistic regression model produces a smooth, monotonic probability curve and is unable to capture the periodic structure present in the data. As a result, it systematically underfits regions where the true probability oscillates.
+
+In contrast, the sinusoidal model closely follows the underlying oscillatory pattern, resulting in better alignment with observed outcomes across the domain.
+
+This visual difference is consistent with quantitative results:
+- Lower cross-entropy for the sinusoidal model
+- Higher AUC, indicating improved class separation
+
+Together, the visualization and metrics demonstrate the importance of aligning model assumptions with the true data-generating process.
+
