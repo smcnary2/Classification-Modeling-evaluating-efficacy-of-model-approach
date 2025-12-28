@@ -1,7 +1,5 @@
 # Classification-Modeling-evaluating-efficacy-of-model-approach
 
-# Logistic vs Sinusoidal Probabilistic Modeling in R
-
 ## Overview
 This project compares two approaches for modeling binary outcomes generated from an underlying oscillating (sinusoidal) probability function:
 
@@ -51,3 +49,4 @@ This visual difference is consistent with quantitative results:
 
 Together, the visualization and metrics demonstrate the importance of aligning model assumptions with the true data-generating process.
 
+![Model Comparison Plot](log_sin_results.png)
